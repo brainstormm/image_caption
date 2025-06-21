@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision.models as models
 
 
+# To convert the input image to a feature vector of "embed_size".
 class Encoder(nn.Module):
     def __init__(self, embed_size):
         super().__init__()
