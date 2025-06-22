@@ -54,7 +54,7 @@ class ImageCaptionModel(nn.Module):
 
         # Pass through the decoder
         decoder_output, _ = self.decoder(decoder_input_combined, initial_hidden)
-        # decoder_output.shape : (batch_size, vocab_size)
+        # decoder_output.shape : (batch_size, max_caption_length - 1, vocab_size)
 
         return decoder_output
 

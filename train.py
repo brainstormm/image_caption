@@ -34,7 +34,10 @@ print(f"Eval batches: {len(eval_loader)}")
 print(f"Test batches: {len(test_loader)}")
 
 model = ImageCaptionModel(
-    num_layers, sequence_length, batch_size, hidden_size, input_size, device
+    embed_size=256,
+    hidden_size=512,
+    vocab_size=1000,
+    num_layers=2,
 )
 
 for epoch in range(epochs):
@@ -43,5 +46,10 @@ for epoch in range(epochs):
         # batch[0] is the image, shape: (batch_size, 3, 224, 224)
         # batch[1] is the caption, shape: (batch_size, caption_length)
         model.train()
+        image, caption = batch
+        print(image.shape)
+        print(len(caption))
+        output = model(image, caption)
+        print(output.shape)
         break
     break
