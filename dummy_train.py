@@ -3,9 +3,19 @@ from models.image_caption_model import ImageCaptionModel
 from models.encoder import Encoder
 from models.decoder import Decoder
 import torch.nn as nn
+from config import (
+    embed_size,
+    hidden_size,
+    vocab_size,
+    num_layers,
+    batch_size,
+    epochs,
+    learning_rate,
+    device,
+)
 
-images = torch.randn(10, 3, 224, 224)
-captions = torch.randint(0, 1000, (10, 10))
+images = torch.randn(100, 3, 224, 224)
+captions = torch.randint(0, 1000, (100, 10))
 
 print(images.shape)
 print(captions.shape)
@@ -14,17 +24,16 @@ print(captions.shape)
 # print(captions)
 
 model = ImageCaptionModel(
-    embed_size=256,
-    hidden_size=512,
-    vocab_size=1000,
-    num_layers=2,
+    embed_size=embed_size,
+    hidden_size=hidden_size,
+    vocab_size=vocab_size,
+    num_layers=num_layers,
 )
 
-criterion = nn.CrossEntropyLoss(ignore_index=0)  # ignore PAD token (index 0)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+criterion = nn.CrossEntropyLoss(ignore_index=0)  # ignore START token (index 0)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-batch_size = 2
-for epoch in range(10):
+for epoch in range(epochs):
     for i in range(0, len(images), batch_size):
         batch_images = images[i : i + batch_size]
         batch_captions = captions[i : i + batch_size]
@@ -35,14 +44,12 @@ for epoch in range(10):
         outputs = model(batch_images, batch_captions)
         print(f"Model outputs shape: {outputs.shape}")
 
-        # Prepare targets for teacher forcing
         # Remove the START token (first token) from captions
-        targets = batch_captions[:, 1:]  # (batch_size, seq_length - 1)
+        targets = batch_captions[:, 1:]  # (batch_size, max_caption_length - 1)
         print(f"Targets shape: {targets.shape}")
 
-        # Reshape outputs and targets for CrossEntropyLoss
-        # outputs: (batch_size, seq_length, vocab_size) -> (batch_size * seq_length, vocab_size)
-        # targets: (batch_size, seq_length) -> (batch_size * seq_length)
+        # outputs: (batch_size, max_caption_length -1, vocab_size) -> (batch_size * (max_caption_length -1), vocab_size)
+        # targets: (batch_size, max_caption_length - 1) -> (batch_size * (max_caption_length - 1))
         batch_size, seq_length, vocab_size = outputs.shape
         outputs = outputs.reshape(-1, vocab_size)
         targets = targets.reshape(-1)
